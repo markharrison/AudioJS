@@ -16,7 +16,15 @@ function log(message, type = 'info') {
     const now = new Date();
     const time = now.toLocaleTimeString('en-GB', { hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit' });
     const ms = String(now.getMilliseconds()).padStart(3, '0');
-    entry.innerHTML = `<span class="log-time">[${time}.${ms}]</span> <span class="log-msg">${message}</span>`;
+    const timeSpan = document.createElement('span');
+    timeSpan.className = 'log-time';
+    timeSpan.textContent = '[' + time + '.' + ms + ']';
+    const msgSpan = document.createElement('span');
+    msgSpan.className = 'log-msg';
+    msgSpan.textContent = message;
+    entry.appendChild(timeSpan);
+    entry.appendChild(document.createTextNode(' '));
+    entry.appendChild(msgSpan);
     logEl.prepend(entry);
     while (logEl.children.length > 150) {
         logEl.removeChild(logEl.lastChild);
