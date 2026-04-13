@@ -278,7 +278,7 @@ setupVolume('sfxVolSlider',    'sfxVolLabel',    v => audio.setSFXVolume(v));
 // ─── Log Controls ────────────────────────────────────────────────────────────
 
 document.getElementById('btnClearLog').addEventListener('click', () => {
-    document.getElementById('actionLog').innerHTML = '';
+    document.getElementById('actionLog').replaceChildren();
     log('Log cleared', 'info');
 });
 
