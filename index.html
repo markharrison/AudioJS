@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AudioJS Test Page</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+
+        .content {
+            padding: 30px;
+        }
+
+        .section {
+            margin-bottom: 30px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            border-left: 4px solid #667eea;
+        }
+
+        .section-title {
+            font-size: 1.5em;
+            margin-bottom: 15px;
+            color: #333;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .section-title::before {
+            content: '▶';
+            color: #667eea;
+        }
+
+        .file-loader {
+            display: grid;
+            grid-template-columns: 1fr auto auto;
+            gap: 10px;
+            align-items: center;
+            margin-bottom: 10px;
+            padding: 10px;
+            background: white;
+            border-radius: 6px;
+        }
+
+        .file-loader label {
+            font-weight: 600;
+            color: #555;
+        }
+
+        .file-status {
+            padding: 5px 10px;
+            border-radius: 4px;
+            font-size: 0.9em;
+        }
+
+        .file-status.loaded {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .file-status.not-loaded {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        input[type="file"] {
+            padding: 8px;
+            border: 2px solid #ddd;
+            border-radius: 6px;
+            font-size: 0.9em;
+        }
+
+        button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            font-size: 1em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 600;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-success {
+            background: #28a745;
+            color: white;
+        }
+
+        .btn-danger {
+            background: #dc3545;
+            color: white;
+        }
+
+        .btn-warning {
+            background: #ffc107;
+            color: #333;
+        }
+
+        .btn-info {
+            background: #17a2b8;
+            color: white;
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+
+        .controls-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .volume-control {
+            margin-bottom: 15px;
+        }
+
+        .volume-control label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+            color: #555;
+        }
+
+        .volume-slider {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        input[type="range"] {
+            flex: 1;
+            height: 8px;
+            border-radius: 4px;
+            background: #ddd;
+            outline: none;
+            -webkit-appearance: none;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #667eea;
+            cursor: pointer;
+        }
+
+        input[type="range"]::-moz-range-thumb {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #667eea;
+            cursor: pointer;
+            border: none;
+        }
+
+        .volume-value {
+            min-width: 50px;
+            text-align: center;
+            font-weight: 600;
+            color: #667eea;
+            background: white;
+            padding: 5px 10px;
+            border-radius: 4px;
+        }
+
+        .status-bar {
+            background: white;
+            padding: 15px;
+            border-radius: 6px;
+            margin-bottom: 15px;
+            border: 2px solid #667eea;
+        }
+
+        .status-bar strong {
+            color: #667eea;
+        }
+
+        #action-log {
+            background: #1e1e1e;
+            color: #d4d4d4;
+            padding: 15px;
+            border-radius: 6px;
+            height: 300px;
+            overflow-y: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+        }
+
+        .log-entry {
+            margin-bottom: 5px;
+            padding: 5px;
+            border-left: 3px solid transparent;
+        }
+
+        .log-info {
+            border-left-color: #17a2b8;
+        }
+
+        .log-success {
+            border-left-color: #28a745;
+            color: #4ade80;
+        }
+
+        .log-warning {
+            border-left-color: #ffc107;
+            color: #fbbf24;
+        }
+
+        .log-error {
+            border-left-color: #dc3545;
+            color: #f87171;
+        }
+
+        .init-section {
+            text-align: center;
+            padding: 20px;
+        }
+
+        .init-section button {
+            font-size: 1.2em;
+            padding: 15px 40px;
+        }
+
+        .transition-control {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 15px;
+            padding: 15px;
+            background: white;
+            border-radius: 6px;
+        }
+
+        .transition-control label {
+            font-weight: 600;
+            color: #555;
+            min-width: 150px;
+        }
+
+        #action-log::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        #action-log::-webkit-scrollbar-track {
+            background: #2d2d2d;
+            border-radius: 4px;
+        }
+
+        #action-log::-webkit-scrollbar-thumb {
+            background: #667eea;
+            border-radius: 4px;
+        }
+
+        .music-controls, .sfx-controls {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 10px;
+        }
+
+        .unload-btn {
+            padding: 6px 12px;
+            font-size: 0.85em;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎵 AudioJS Test Page</h1>
+            <p>Web Audio API Library for Simple Games</p>
+        </div>
+
+        <div class="content">
+            <!-- Initialization Section -->
+            <div class="section init-section">
+                <button id="init-btn" class="btn-primary">🚀 Initialize AudioJS</button>
+            </div>
+
+            <!-- Status Section -->
+            <div class="section">
+                <div class="section-title">Status</div>
+                <div class="status-bar">
+                    <strong>Playback Status:</strong> <span id="playback-status">Not initialized</span>
+                </div>
+            </div>
+
+            <!-- File Loading Section -->
+            <div class="section">
+                <div class="section-title">Load Audio Files</div>
+
+                <h3 style="margin-bottom: 10px; color: #667eea;">Music Files</h3>
+                <div class="file-loader">
+                    <label>Music 1:</label>
+                    <input type="file" id="file-music1" accept=".mp3,.wav">
+                    <span id="status-music1" class="file-status not-loaded">Not loaded</span>
+                    <button id="unload-music1" class="btn-danger unload-btn">Unload</button>
+                </div>
+                <div class="file-loader">
+                    <label>Music 2:</label>
+                    <input type="file" id="file-music2" accept=".mp3,.wav">
+                    <span id="status-music2" class="file-status not-loaded">Not loaded</span>
+                    <button id="unload-music2" class="btn-danger unload-btn">Unload</button>
+                </div>
+
+                <h3 style="margin: 20px 0 10px 0; color: #667eea;">Sound Effects</h3>
+                <div class="file-loader">
+                    <label>SFX 1:</label>
+                    <input type="file" id="file-sfx1" accept=".mp3,.wav">
+                    <span id="status-sfx1" class="file-status not-loaded">Not loaded</span>
+                    <button id="unload-sfx1" class="btn-danger unload-btn">Unload</button>
+                </div>
+                <div class="file-loader">
+                    <label>SFX 2:</label>
+                    <input type="file" id="file-sfx2" accept=".mp3,.wav">
+                    <span id="status-sfx2" class="file-status not-loaded">Not loaded</span>
+                    <button id="unload-sfx2" class="btn-danger unload-btn">Unload</button>
+                </div>
+                <div class="file-loader">
+                    <label>SFX 3:</label>
+                    <input type="file" id="file-sfx3" accept=".mp3,.wav">
+                    <span id="status-sfx3" class="file-status not-loaded">Not loaded</span>
+                    <button id="unload-sfx3" class="btn-danger unload-btn">Unload</button>
+                </div>
+            </div>
+
+            <!-- Playback Controls Section -->
+            <div class="section">
+                <div class="section-title">Playback Controls</div>
+
+                <h3 style="margin-bottom: 10px; color: #667eea;">Music</h3>
+                <div class="music-controls">
+                    <button id="play-music1" class="btn-success">▶ Play Music 1</button>
+                    <button id="play-music2" class="btn-success">▶ Play Music 2</button>
+                    <button id="pause-music" class="btn-warning">⏸ Pause</button>
+                    <button id="resume-music" class="btn-info">▶ Resume</button>
+                    <button id="stop-music" class="btn-danger">⏹ Stop Music</button>
+                </div>
+
+                <h3 style="margin: 20px 0 10px 0; color: #667eea;">Sound Effects</h3>
+                <div class="sfx-controls">
+                    <button id="play-sfx1" class="btn-info">🔊 Play SFX 1</button>
+                    <button id="play-sfx2" class="btn-info">🔊 Play SFX 2</button>
+                    <button id="play-sfx3" class="btn-info">🔊 Play SFX 3</button>
+                </div>
+
+                <h3 style="margin: 20px 0 10px 0; color: #667eea;">Global Controls</h3>
+                <div class="controls-grid">
+                    <button id="stop-all" class="btn-danger">⏹ Stop All</button>
+                    <button id="cleanup-btn" class="btn-secondary">🧹 Cleanup</button>
+                </div>
+            </div>
+
+            <!-- Test Functions Section -->
+            <div class="section">
+                <div class="section-title">Test Functions</div>
+
+                <div class="controls-grid">
+                    <button id="test-loop" class="btn-info">🔁 Test Loop</button>
+                    <button id="test-simultaneous" class="btn-info">🎼 Test Simultaneous</button>
+                </div>
+            </div>
+
+            <!-- Music Transition Section -->
+            <div class="section">
+                <div class="section-title">Music Transitions</div>
+
+                <div class="transition-control">
+                    <label>Transition Duration:</label>
+                    <input type="range" id="transition-duration" min="1" max="10" value="2" step="1">
+                    <span class="volume-value" id="transition-value">2s</span>
+                </div>
+
+                <div class="controls-grid">
+                    <button id="transition-1to2" class="btn-primary">🔄 Music 1 → 2</button>
+                    <button id="transition-2to1" class="btn-primary">🔄 Music 2 → 1</button>
+                </div>
+            </div>
+
+            <!-- Volume Controls Section -->
+            <div class="section">
+                <div class="section-title">Volume Controls</div>
+
+                <div class="volume-control">
+                    <label>Master Volume</label>
+                    <div class="volume-slider">
+                        <input type="range" id="master-volume" min="0" max="100" value="100">
+                        <span class="volume-value" id="master-value">100</span>
+                    </div>
+                </div>
+
+                <div class="volume-control">
+                    <label>Music Volume</label>
+                    <div class="volume-slider">
+                        <input type="range" id="music-volume" min="0" max="100" value="100">
+                        <span class="volume-value" id="music-value">100</span>
+                    </div>
+                </div>
+
+                <div class="volume-control">
+                    <label>SFX Volume</label>
+                    <div class="volume-slider">
+                        <input type="range" id="sfx-volume" min="0" max="100" value="100">
+                        <span class="volume-value" id="sfx-value">100</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Action Log Section -->
+            <div class="section">
+                <div class="section-title">Action Log</div>
+                <div id="action-log"></div>
+                <button id="clear-log" class="btn-secondary" style="margin-top: 10px;">Clear Log</button>
+            </div>
+        </div>
+    </div>
+
+    <script type="module" src="test.js"></script>
+</body>
+</html>
